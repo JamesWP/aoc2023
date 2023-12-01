@@ -1,31 +1,21 @@
 from puzzle_input import lines
+import re
 
-def valueof(thing):
-  thing = thing.replace("one", "1")
-  thing = thing.replace("two", "2")
-  thing = thing.replace("three", "3")
-  thing = thing.replace("four", "4")
-  thing = thing.replace("five", "5")
-  thing = thing.replace("six", "6")
-  thing = thing.replace("seven", "7")
-  thing = thing.replace("eight", "8")
-  thing = thing.replace("nine", "9")
-  return int(thing)
-
+reg = re.compile("(?=()(1)|(2)|(3)|(4)|(5)|(6)|(7)|(8)|(9)|()(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine))")
 
 def calibration_value(line):
-  things = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
-  first = (9999, "")
-  last = (-1, "")
 
-  for thing in things:
-    first = min(first, (line.find(thing), thing)) if thing in line else first
-    last = max(last, (line.rfind(thing), thing)) if thing in line else last
+  results = list(reg.finditer(line))
+ 
+  def group_index(match):
+    return [ True if group else False for group in match.groups() ].index(True)
+
+  first = group_index(results[0])%10
+  last = group_index(results[-1])%10
   
-  first = valueof(first[1])
-  last = valueof(last[1])
-  print(line, first) 
-  print(line, last) 
+  print(line, first)
+  print(line, last)
+
   return first * 10 + last
 
 def test_numbers():
@@ -42,5 +32,7 @@ def test_numbers():
   assert 42 == calibration_value("4nineeightseven2")
   assert 14 == calibration_value("zoneight234")
   assert 76 == calibration_value("7pqrstsixteen")
+
+  assert 18 == calibration_value("crvhlfone7xsqhkshpsix2nine73oneighttq")
 
   assert sum(calibration_value(line) for line in lines(1)) == 56017
