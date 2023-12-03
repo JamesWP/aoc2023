@@ -16,8 +16,8 @@ def calibration_value(line):
     first = group_index(results[0]) % 10
     last = group_index(results[-1]) % 10
 
-    print(line, first)
-    print(line, last)
+    #print(line, first)
+    #print(line, last)
 
     return first * 10 + last
 
