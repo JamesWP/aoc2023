@@ -18,61 +18,65 @@ def solve(inp):
   not_symbols = list("0123456789.")
   numbers = list("0123456789")  
 
+  def find_number(x,y,m):
+    if (x,y) not in m or not m[(x,y)].isnumeric():
+      return 0
+
+    while (x,y) in m and m[(x,y)].isnumeric():
+      x-=1
+    x+=1
+    num = 0
+     
+    while (x,y) in m and m[(x,y)].isnumeric():
+      num = num*10 + int(m[(x,y)])
+      m[(x,y)] = '.'
+      x+=1
+    return num
+
   def remove(x,y,m):
-    if (x,y) not in m:
-      return
-    if m[(x,y)] == '.':
-      return
+    a = []
+    a.append(find_number(x+1,y,m))
+    a.append(find_number(x-1,y,m))
+    a.append(find_number(x,y+1,m))
+    a.append(find_number(x,y-1,m))
+    a.append(find_number(x+1,y+1,m))
+    a.append(find_number(x-1,y+1,m))
+    a.append(find_number(x-1,y-1,m))
+    a.append(find_number(x+1,y-1,m))
+    return [v for v in a if v != 0]
 
-    m[(x,y)] = '.'
-    remove(x+1,y,m)
-    remove(x-1,y,m)
-    remove(x,y+1,m)
-    remove(x,y-1,m)
-    remove(x+1,y+1,m)
-    remove(x-1,y+1,m)
-    remove(x-1,y-1,m)
-    remove(x+1,y-1,m) 
-
-  def do_total(m):
-    total = 0
+  def print_schematic(m):
     for y in range(200):
       if (0,y) not in m:
         break
 
-      num = 0
       for x in range(200):
         if (x,y) not in m:
-          # print()
-          # print(num)
-          total += num
-          num = 0
+          print()
           break
-        if m[(x,y)].isnumeric():
-          num *= 10
-          num += int(m[(x,y)])
-        else:
-          # print(num)
-          total += num
-          num  = 0
+        print(m[(x,y)],end='')
 
-        # print(m[(x,y)],end='')
-    #print(total) 
-    return total
+  #print_schematic(m)
 
-  a = do_total(m)
+  total=0
+  gear_count=0
+  
   for (x,y) in m.keys():
     if m[(x,y)] not in not_symbols:
-      remove(x,y,m)
-  b = do_total(m)
+      numbers = remove(x,y,m)
+      total += sum(numbers)
+      if len(numbers) == 2 and m[(x,y)] == '*':
+        a,b = numbers
+        gear_count += a*b 
+  #print()
+  #print_schematic(m)
 
-  print(a-b)
-  return a-b
+  return total, gear_count
 
 def test_thing():
   a, b = parse() 
 
   #print(b)
 
-  assert 4361 == solve(a)
-  assert 525119 == solve(b)
+  assert (4361,467835) == solve(a)
+  assert (525119,76504829) == solve(b)
