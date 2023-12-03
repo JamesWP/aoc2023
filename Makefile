@@ -1,4 +1,4 @@
 
 .PHONY: test
 test:
-	python3.10 -m pytest .
+	python3.10 -m pytest . -s
