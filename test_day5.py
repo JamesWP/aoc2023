@@ -98,4 +98,4 @@ humidity-to-location map:
     data = parse(test_data.split('\n'))
     assert 35 == solve(data)
 
-    assert 0 == solve(parse(list(puzzle_input.lines(5))))
+    assert 388071289 == solve(parse(list(puzzle_input.lines(5))))
