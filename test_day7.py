@@ -87,7 +87,7 @@ def solve(hands, jokers):
     value = 0
     for i, (hand, bid) in enumerate(sorted_hands):
         value += (i +1) * bid
-        print(hand, bid, i+1, bid * (i+1))
+        # print(hand, bid, i+1, bid * (i+1))
     return value
 
 def test_solve():
