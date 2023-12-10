@@ -10,6 +10,10 @@ class Cell:
         self.up = None
         self.down = None
 
+        self.c = None
+        self.x = None
+        self.y = None
+
 
 def parse(input):
     cells = collections.defaultdict(Cell)
@@ -36,6 +40,10 @@ def parse(input):
 
     for y,line in enumerate(input):
         for x,c in enumerate(line):
+            cells[(x,y)].c = c
+            cells[(x,y)].x = x
+            cells[(x,y)].y = y
+
             if c == '.':
                 continue
             if c == '-':
@@ -61,17 +69,18 @@ def parse(input):
             else:
                 assert False, "Unknown cell type: %s" % c
 
+    start_cell = cells[start]
+
     for (x,y) in [(start[0]-1, start[1]), (start[0]+1, start[1]), (start[0], start[1]-1), (start[0], start[1]+1)]:
         cell = cells[(x,y)]
-        start_cell = cells[start]
-        if cell.left == cells[start]:
-            start_cell.right = cell
-        if cell.right == cells[start]:
-            start_cell.left = cell
-        if cell.up == cells[start]:
-            start_cell.down = cell
-        if cell.down == cells[start]:
-            start_cell.up = cell
+        if cell.left == start_cell:
+            connect_right(start[0], start[1])
+        if cell.right == start_cell:
+            connect_left(start[0], start[1])
+        if cell.up == start_cell:
+            connect_down(start[0], start[1])
+        if cell.down == start_cell:
+            connect_up(start[0], start[1])
 
     return cells, start_cell
 
@@ -106,13 +115,13 @@ def print_maze(cells, start, dist=None):
     min_y = min(y for x,y in cells)
     max_y = max(y for x,y in cells)
 
-    for y in range(min_y-4, max_y+4):
-        for x in range(min_x-4, max_x+4):
+    for y in range(min_y, max_y+1):
+        for x in range(min_x, max_x+1):
             c = cells[(x,y)]
             
             if dist is not None:
                 if c in dist and dist[c] is not None:
-                    print(dist[c], end='')
+                    print(dist[c]%10, end='')
                 else:
                     print('.', end='')
             
@@ -133,12 +142,49 @@ def print_maze(cells, start, dist=None):
             else:
                 print('.', end='')
         print()
+    print("-------")
+
+def count_inside(cells, dist):
+    min_x = min(x for x,y in cells)
+    max_x = max(x for x,y in cells)
+    min_y = min(y for x,y in cells)
+    max_y = max(y for x,y in cells)
+
+    num_inside = 0
+    for y in range(min_y, max_y+1):
+        inside = False
+        for x in range(min_x, max_x+1):
+            c = cells[(x,y)]
+            if c.up is not None and c in dist and dist[c] is not None:
+                inside = not inside
+                # print("U", end='')
+            else:
+                # print(".", end='')
+                pass
+            if (c.left is None and c.right is None and c.up is None and c.down is None) or (c not in dist or dist[c] is None):
+                if inside:
+                    num_inside += 1
+                    # print('I', end='')
+                else:
+                    # print('.', end='')
+                    pass
+            else:
+                # print('.', end='')
+                pass
+        assert not inside
+        # print()
+    # print("-------")
+
+    return num_inside
+
 
 def solve(input):
     cells, start = parse(input)
     dist, prev = dijkstra(start)
     # print_maze(cells, start, dist)
-    return max(d for d in dist.values() if d is not None)
+    path_length = max(d for d in dist.values() if d is not None)
+
+    return path_length, count_inside(cells, dist)
 
 
 def input():
@@ -162,9 +208,48 @@ def input3():
     yield "|F--J"
     yield "LJ.LJ"
 
-def test_solve():
-    assert solve(input()) == 4
-    assert solve(input2()) == 8
-    assert solve(input2()) == solve(input3())
+def larger_input():
+    lines = """
+.F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...
+""".strip().splitlines()
+    for line in lines:
+        yield line
 
-    assert solve(puzzle_input.lines(10)) == 6870
+def other_larger_input():
+    lines = """
+FF7FSF7F7F7F7F7F---7
+L|LJ||||||||||||F--J
+FL-7LJLJ||||||LJL-77
+F--JF--7||LJLJ7F7FJ-
+L---JF-JLJ.||-FJLJJ7
+|F|F-JF---7F7-L7L|7|
+|FFJF7L7F-JF7|JL---7
+7-L-JL7||F7|L7F-7F7|
+L.L7LFJ|||||FJL7||LJ
+L7JLJL-JLJLJL--JLJ.L
+""".strip().splitlines()
+    for line in lines:
+        yield line
+
+
+def test_solve():
+    assert solve(input()) == (4, 1) 
+    assert solve(input2()) == (8,1)
+    assert solve(input2())[0] == solve(input3())[0]
+
+    assert solve(larger_input())[1] == 8
+    assert solve(other_larger_input())[1] == 10
+
+    assert solve(puzzle_input.lines(10)) == (6870, 287)
+
+def test_mini_test_solve():
+    solve(input3())
