@@ -159,4 +159,4 @@ def test_solve():
     assert solve(start, goal, directions) == 6
 
     start, goal, directions = input_real(False)
-    assert solve(start, goal, directions) == 0
+    assert solve(start, goal, directions) == 14449445933179
