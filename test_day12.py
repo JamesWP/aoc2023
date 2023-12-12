@@ -1,13 +1,18 @@
 import puzzle_input
 
-def parse(line):
-    spring_condition, rle = line.split(" ") 
-    return [c for c in spring_condition], tuple(int(length) for length in rle.split(","))
+def parse(lines):
+    for line in lines:
+        spring_condition, rle = line.split(" ") 
+        yield [c for c in spring_condition], tuple(int(length) for length in rle.split(","))
 
-def test_parse():
-    assert (["?","#","#","#","?","?","?","?","?","?","?","?"], (3,2,1)) == parse("?###???????? 3,2,1")
-    assert (list( c for c in "?#?#?#?#?#?#?#?"), (1,3,1,6)) == parse("?#?#?#?#?#?#?#? 1,3,1,6")
-
+def parse_complicated(lines):
+    for spring_condition, rle in parse(lines):
+        yield (spring_condition 
+            + ["?"] + spring_condition
+            + ["?"] + spring_condition
+            + ["?"] + spring_condition
+            + ["?"] + spring_condition,
+            rle + rle + rle + rle + rle) 
 
 def combinations(condition, rle):
     if "?" not in condition:
@@ -61,14 +66,14 @@ def test_get_rle():
 
 def solve(lines):
     possibilities = 0
-    for line in lines:
-        spring_condition, rle = parse(line)
+    for spring_condition, rle in lines:
         possibilities += combinations(spring_condition, rle)
     return possibilities     
 
 def test_solve():
-    assert 21 == solve(input())
-    assert 6981 == solve(puzzle_input.lines(12))
+    assert 21 == solve(parse(input()))
+    assert 525152 == solve(parse_complicated(input()))
+    assert 6981 == solve(parse(puzzle_input.lines(12)))
     
 def input():
     return """
